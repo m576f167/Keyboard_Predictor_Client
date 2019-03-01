@@ -81,7 +81,7 @@ class AccelerometerListener implements SensorEventListener {
 		ay = event.values[1];
 		az = event.values[2];
 
-		at = event.timestap;
+		at = event.timestamp;
 	}
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 	}
@@ -93,7 +93,7 @@ class GyroscopeListener implements SensorEventListener {
 		gy = event.values[1];
 		gz = event.values[2];
 
-		gt = event.timestap;
+		gt = event.timestamp;
 	}
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 	}
