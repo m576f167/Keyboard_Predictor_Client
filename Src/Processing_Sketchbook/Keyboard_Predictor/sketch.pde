@@ -126,14 +126,16 @@ void mousePressed() {
 public void onResume() {
 	super.onResume();
 	if (manager != null) {
-		manager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_GAME);
+		manager.registerListener(listener_accelerometer, sensor_accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+		manager.registerListener(listener_gyroscope, sensor_gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
 	}
 }
 
 public void onPause() {
 	super.onPause();
 	if (manager != null) {
-		manager.unregisterListener(listener);
+		manager.unregisterListener(listener_accelerometer);
+		manager.unregisterListener(listener_gyroscope);
 	}
 }
 
