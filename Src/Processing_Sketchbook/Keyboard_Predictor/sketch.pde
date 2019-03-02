@@ -9,6 +9,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.view.KeyEvent;
 import java.util.LinkedList;
 import java.util.Queue;
 import http.requests.*;
@@ -68,7 +69,7 @@ void setup() {
 	}
 	catch(Exception e){
 		g_config = new JSONObject();
-		g_config.setString("host_address", "127.0.0.1:80");
+		g_config.setString("host_address", "http://127.0.0.1:80");
 		g_host_address = g_config.getString("host_address");
 	}
 
@@ -197,26 +198,32 @@ void runInferrence() {
  */
 
 void keyReleased() {
+	// When Back is pressed
+	if (keyCode == KeyEvent.KEYCODE_BACK) {
+		g_mode = 0;
+		g_api = "";
+		if (g_is_keyboard_open){
+			g_is_keyboard_open = false;
+			closeKeyboard();
+		}
+		return;
+	}
+
+	// Normal Key is pressed
 	if (g_current_word.charAt(g_index_current_char) == key) {
 		g_last_typed += Character.toString(key);
 		g_index_current_char++;
-	}
-	else {
-		g_index_current_word += 1;
-		g_current_word = g_list_words.get(g_index_current_word);
-		g_index_current_char = 0;
-		g_last_typed = "";
+
+		if (g_index_current_char < g_current_word.length()){
+			return;
+		}
 	}
 
-}
-
-void backPressed() {
-	g_mode = 0;
-	g_api = "";
-	if (g_is_keyboard_open){
-		g_is_keyboard_open = false;
-		closeKeyboard();
-	}
+	// Retrieve a new word
+	g_index_current_word += 1;
+	g_current_word = g_list_words.get(g_index_current_word);
+	g_index_current_char = 0;
+	g_last_typed = "";
 }
 
 void mousePressed() {
@@ -230,14 +237,14 @@ void mousePressed() {
 			g_api = "/post-inferrence";
 		}
 
-		// Open Keyboard
-		if (!g_is_keyboard_open){
-			g_is_keyboard_open = true;
-			openKeyboard();
-		}
-
 		// Start threadSendData
 		thread("threadSendData");
+	}
+
+	// Open Keyboard
+	if (!g_is_keyboard_open){
+		g_is_keyboard_open = true;
+		openKeyboard();
 	}
 }
 
