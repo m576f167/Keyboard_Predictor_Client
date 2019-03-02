@@ -63,7 +63,7 @@ void setup() {
 	// Load Host Address
 	try{
 		g_config = loadJSONObject("config.json");
-		g_host_address = g_config.getString("host_address")
+		g_host_address = g_config.getString("host_address");
 	}
 	catch(Exception e){
 		g_config = new JSONObject();
