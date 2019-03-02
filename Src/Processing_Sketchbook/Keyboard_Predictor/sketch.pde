@@ -9,6 +9,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import java.util.LinkedList;
+import java.util.Queue;
+import http.requests.*;
 
 /****************************************************/
 // ================================================ //
@@ -16,17 +19,25 @@ import android.hardware.SensorEventListener;
 /*
  * Global Variables
  */
-Context context;
-SensorManager manager;
-Sensor sensor_accelerometer;
-Sensor sensor_gyroscope;
-AccelerometerListener listener_accelerometer;
-GyroscopeListener listener_gyroscope;
+Context g_context;
+SensorManager g_manager;
+Sensor g_sensor_accelerometer;
+Sensor g_sensor_gyroscope;
+AccelerometerListener g_listener_accelerometer;
+GyroscopeListener g_listener_gyroscope;
+MutexLock g_lock_queue_data;
+Queue<JSONObject> g_queue_data;
 
-float ax, ay, az;
-float gx, gy, gz;
-long at, gt;
-boolean keyboard = false;
+JSONObject g_config;
+StringList g_list_words;
+String g_host_address;
+String g_api = "";
+String g_current_word = "";
+String g_last_typed = "";
+int g_index_current_char = 0;
+int g_index_current_word = 0;
+int g_mode = 0;
+boolean g_is_keyboard_open = false;
 
 /****************************************************/
 // ================================================ //
@@ -35,25 +46,47 @@ boolean keyboard = false;
  * Setup method
  */
 void setup() {
+	// Initialize display
 	fullScreen();
 	textFont(createFont("SansSerif", 40 * displayDensity));
 	fill(0);
 
-	context = getActivity();
-	manager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+	// Create queue and queue lock
+	g_queue_data = new LinkedList<>();
+	g_lock_queue_data = new MutexLock();
+
+	// Load Word list
+	String[] lines = loadStrings("words_alpha.txt");
+	g_list_words = new StringList(lines);
+	g_list_words.shuffle();
+
+	// Load Host Address
+	try{
+		g_config = loadJSONObject("config.json");
+		g_host_address = g_config.getString("host_address")
+	}
+	catch(Exception e){
+		g_config = new JSONObject();
+		g_config.setString("host_address", "127.0.0.1:80");
+		g_host_address = g_config.getString("host_address");
+	}
+
+	// Initialize Sensor Manager
+	g_context = getActivity();
+	g_manager = (SensorManager)g_context.getSystemService(Context.SENSOR_SERVICE);
 
 	// Create and register Accelerometer Listener
-	sensor_accelerometer = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-	listener_accelerometer = new AccelerometerListener();
-	manager.registerListener(listener_accelerometer,
-				 sensor_accelerometer,
+	g_sensor_accelerometer = g_manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+	g_listener_accelerometer = new AccelerometerListener();
+	g_manager.registerListener(g_listener_accelerometer,
+				 g_sensor_accelerometer,
 				 SensorManager.SENSOR_DELAY_FASTEST);
 
 	// Create and register Gyroscope Listener
-	sensor_gyroscope = manager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-	listener_gyroscope = new GyroscopeListener();
-	manager.registerListener(listener_gyroscope,
-				 sensor_gyroscope,
+	g_sensor_gyroscope = g_manager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+	g_listener_gyroscope = new GyroscopeListener();
+	g_manager.registerListener(g_listener_gyroscope,
+				 g_sensor_gyroscope,
 				 SensorManager.SENSOR_DELAY_FASTEST);
 }
 
@@ -67,6 +100,15 @@ void draw() {
 	background(255);
 //	text(key, width/2, height/2);
 	text("aX: " + ax + "\naY: " + ay + "\naZ: " + az + "\naT: " + at + "\n\ngX: " + gx + "\ngY: " + gy + "\ngZ: " + gz + "\ngT: " + gt, 0, 0, width, height);
+	if (g_mode == 0) {
+		selectMode();
+	}
+	else if (g_mode == 1) {
+		runPrediction();
+	}
+	else if (g_mode == 2) {
+		runInferrence();
+	}
 }
 
 /****************************************************/
@@ -75,13 +117,14 @@ void draw() {
 /*
  * Custom Classes
  */
+
+class MutexLock {
+	public MutexLock() { }
+}
+
 class AccelerometerListener implements SensorEventListener {
 	public void onSensorChanged(SensorEvent event) {
-		ax = event.values[0];
-		ay = event.values[1];
-		az = event.values[2];
-
-		at = event.timestamp;
+		putSensorData(event, g_queue_data, g_lock_queue_data);
 	}
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 	}
@@ -89,11 +132,7 @@ class AccelerometerListener implements SensorEventListener {
 
 class GyroscopeListener implements SensorEventListener {
 	public void onSensorChanged(SensorEvent event) {
-		gx = event.values[0];
-		gy = event.values[1];
-		gz = event.values[2];
-
-		gt = event.timestamp;
+		putSensorData(event, g_queue_data, g_lock_queue_data);
 	}
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 	}
@@ -103,42 +142,158 @@ class GyroscopeListener implements SensorEventListener {
 // ================================================ //
 /****************************************************/
 /*
- * Interrupt Event Driven Methods
+ * Custom Methods
  */
-void keyPressed() {
-	background(200, 50, 30);  
+
+public void putSensorData(SensorEvent event, Queue<JSONObject> queue, MutexLock lock) {
+	JSONObject data = new JSONObject();
+
+	data.setFloat("x", event.values[0]);
+	data.setFloat("y", event.values[1]);
+	data.setFloat("z", event.values[2]);
+
+	data.setLong("t", event.timestamp);
+
+	if (keyPressed){
+		data.setString("key", key)
+	}
+	else {
+		data.setString("key", "NULL")
+	}
+
+	synchronized(lock) {
+		queue.add(data);
+	}
 }
 
+void selectMode() {
+	background(255);
+	fill(255);
+	rect(0, 0, width, height/2);
+	rect(0, height/2, width, height);
+	fill(0);
+	text(width/3, height/6, width/3, height/6);
+	text(width/3, height/2 + height/6, width/3, height/6)
+}
+
+void runTraining() {
+	background(255);
+	fill(0);
+	text(g_current_word, width/12, height/10, width * 10/12, height/10);
+	fill(255, 0, 0);
+	text(g_last_typed, width/12, height * 3/10, width * 10/12, height/10)
+}
+
+void runInferrence() {
+	background(255);
+	fill(255, 0, 0);
+	text(g_last_typed, width/12, height/6, width * 10/12, height/6)
+}
+
+/****************************************************/
+// ================================================ //
+/****************************************************/
+/*
+ * Interrupt Event Driven Methods
+ */
+
 void keyReleased() {
-	
+	if (g_current_word.charAt(g_index_current_char) == key) {
+		g_last_typed += key;
+		g_index_current_char++;
+	}
+	else {
+		g_index_current_word += 1;
+		g_current_word = g_list_words[g_index_current_word];
+		g_index_current_char = 0;
+		g_last_typed = "";
+	}
+
+}
+
+void backPressed() {
+	g_mode = 0;
+	g_api = "";
+	if (g_is_keyboard_open){
+		g_is_keyboard_open = false;
+		closeKeyboard();
+	}
 }
 
 void mousePressed() {
-	if (!keyboard) {
-		openKeyboard();
-		keyboard = true;
-	} else {
-		closeKeyboard();
-		keyboard = false;
+	if (g_mode == 0){
+		if ((mouseY <= height/2) && (mouseY >= 0)) {
+			g_mode = 1;
+			g_api = "/post-training";
+		}
+		else {
+			g_mode = 2;
+			g_api = "/post-inferrence";
+		}
+
+		// Open Keyboard
+		if (!g_is_keyboard_open){
+			g_is_keyboard_open = true;
+			openKeyboard();
+		}
+
+		// Start threadSendData
+		thread("threadSendData");
 	}
 }
 
 public void onResume() {
 	super.onResume();
-	if (manager != null) {
-		manager.registerListener(listener_accelerometer, sensor_accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
-		manager.registerListener(listener_gyroscope, sensor_gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+	if (g_manager != null) {
+		g_manager.registerListener(g_listener_accelerometer, g_sensor_accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+		g_manager.registerListener(g_listener_gyroscope, g_sensor_gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
 	}
 }
 
 public void onPause() {
 	super.onPause();
-	if (manager != null) {
-		manager.unregisterListener(listener_accelerometer);
-		manager.unregisterListener(listener_gyroscope);
+	if (g_manager != null) {
+		g_manager.unregisterListener(g_listener_accelerometer);
+		g_manager.unregisterListener(g_listener_gyroscope);
 	}
 }
 
+/****************************************************/
+// ================================================ //
+/****************************************************/
+/*
+ * Thread Methods
+ */
+
+void threadSendData() {
+	while (true){
+		try {
+			if (g_mode == 0){
+				return
+			}
+
+			synchronized(g_lock_queue_data) {
+				JSONObject data = g_queue_data.peek();
+			}
+
+			PostRequest post = new PostRequest(g_host_address + g_api);
+			post.addData("data", data);
+			post.send();
+
+			response = post.getContent();
+			response = parseJSONObject(response);
+
+			if (response.getInt("status-code") == 0) {
+				synchronized(g_lock_queue_data) {
+					g_queue_data.remove();
+				}
+			}
+		}
+		catch(Exception e) {
+			
+		}
+	}
+}
 /****************************************************/
 // ================================================ //
 /****************************************************/
