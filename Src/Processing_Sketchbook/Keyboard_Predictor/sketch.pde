@@ -276,7 +276,7 @@ void threadSendData() {
 			}
 
 			PostRequest post = new PostRequest(g_host_address + g_api);
-			post.addData("data", data);
+			post.addData("data", data.toString());
 			post.send();
 
 			String response = post.getContent();
