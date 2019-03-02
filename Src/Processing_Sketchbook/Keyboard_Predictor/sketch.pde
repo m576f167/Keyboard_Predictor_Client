@@ -48,7 +48,7 @@ int g_mode = 0;
 void setup() {
 	// Initialize display
 	fullScreen();
-	textFont(createFont("SansSerif", 40 * displayDensity), height/10);
+	textFont(createFont("SansSerif", 40 * displayDensity));
 	fill(0);
 
 	// Create queue and queue lock
