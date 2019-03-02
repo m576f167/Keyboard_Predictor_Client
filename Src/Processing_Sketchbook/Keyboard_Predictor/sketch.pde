@@ -153,10 +153,10 @@ public void putSensorData(SensorEvent event, Queue<JSONObject> queue, MutexLock 
 	data.setLong("t", event.timestamp);
 
 	if (keyPressed){
-		data.setString("key", key)
+		data.setString("key", key);
 	}
 	else {
-		data.setString("key", "NULL")
+		data.setString("key", "NULL");
 	}
 
 	synchronized(lock) {
@@ -171,7 +171,7 @@ void selectMode() {
 	rect(0, height/2, width, height);
 	fill(0);
 	text(width/3, height/6, width/3, height/6);
-	text(width/3, height/2 + height/6, width/3, height/6)
+	text(width/3, height/2 + height/6, width/3, height/6);
 }
 
 void runTraining() {
@@ -179,13 +179,13 @@ void runTraining() {
 	fill(0);
 	text(g_current_word, width/12, height/10, width * 10/12, height/10);
 	fill(255, 0, 0);
-	text(g_last_typed, width/12, height * 3/10, width * 10/12, height/10)
+	text(g_last_typed, width/12, height * 3/10, width * 10/12, height/10);
 }
 
 void runInferrence() {
 	background(255);
 	fill(255, 0, 0);
-	text(g_last_typed, width/12, height/6, width * 10/12, height/6)
+	text(g_last_typed, width/12, height/6, width * 10/12, height/6);
 }
 
 /****************************************************/
@@ -267,7 +267,7 @@ void threadSendData() {
 	while (true){
 		try {
 			if (g_mode == 0){
-				return
+				return;
 			}
 
 			synchronized(g_lock_queue_data) {
