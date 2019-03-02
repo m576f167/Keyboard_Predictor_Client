@@ -48,7 +48,7 @@ boolean g_is_keyboard_open = false;
 void setup() {
 	// Initialize display
 	fullScreen();
-	textFont(createFont("SansSerif", 40 * displayDensity), 20);
+	textFont(createFont("SansSerif", 40 * displayDensity), height/10);
 	fill(0);
 
 	// Create queue and queue lock
@@ -179,7 +179,7 @@ void runTraining() {
 	background(255);
 	fill(0);
 	text(g_current_word, width/12, height/10);
-	fill(255, 0, 0);
+	fill();
 	text(g_last_typed, width/12, height * 3/10);
 }
 
