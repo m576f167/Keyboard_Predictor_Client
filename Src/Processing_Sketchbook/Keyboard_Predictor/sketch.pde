@@ -59,7 +59,7 @@ void setup() {
 	String[] lines = loadStrings("words_alpha.txt");
 	g_list_words = new StringList(lines);
 	g_list_words.shuffle();
-	g_current_word = g_list_words.get(g_index_current_word)
+	g_current_word = g_list_words.get(g_index_current_word);
 
 	// Load Host Address
 	try{
