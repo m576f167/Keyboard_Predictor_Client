@@ -52,7 +52,7 @@ void setup() {
 	fill(0);
 
 	// Create queue and queue lock
-	g_queue_data = new LinkedList<>();
+	g_queue_data = new LinkedList<JSONObject>();
 	g_lock_queue_data = new MutexLock();
 
 	// Load Word list
