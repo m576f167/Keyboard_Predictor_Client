@@ -38,7 +38,6 @@ String g_last_typed = "";
 int g_index_current_char = 0;
 int g_index_current_word = 0;
 int g_mode = 0;
-boolean g_is_keyboard_open = false;
 
 /****************************************************/
 // ================================================ //
@@ -172,8 +171,8 @@ void selectMode() {
 	rect(0, 0, width, height/2);
 	rect(0, height/2, width, height);
 	fill(0);
-	text("Training", width * 2/3, height * 2/6);
-	text("Inference", width * 2/3, height/2 + height * 2/6);
+	text("Training", width/3, height * 2/6);
+	text("Inference", width/3, height/2 + height * 2/6);
 }
 
 void runTraining() {
@@ -202,28 +201,38 @@ void keyReleased() {
 	if (keyCode == KeyEvent.KEYCODE_BACK) {
 		g_mode = 0;
 		g_api = "";
-		if (g_is_keyboard_open){
-			g_is_keyboard_open = false;
-			closeKeyboard();
-		}
+		closeKeyboard();
 		return;
 	}
 
-	// Normal Key is pressed
-	if (g_current_word.charAt(g_index_current_char) == key) {
-		g_last_typed += Character.toString(key);
-		g_index_current_char++;
+	if (g_mode == 1) {
+		// Normal Key is pressed
+		if (g_current_word.charAt(g_index_current_char) == key) {
+			g_last_typed += Character.toString(key);
+			g_index_current_char++;
 
-		if (g_index_current_char < g_current_word.length()){
-			return;
+			if (g_index_current_char < g_current_word.length()){
+				return;
+			}
+		}
+
+		// Retrieve a new word
+		g_index_current_word += 1;
+		g_current_word = g_list_words.get(g_index_current_word);
+		g_index_current_char = 0;
+		g_last_typed = "";
+	}
+	else if (g_mode == 2) {
+		// Normal Key is pressed until space
+		if (keyCode == KeyEvent.KEYCODE_SPACE) {
+			g_index_current_char = 0;
+			g_last_typed = "";
+		}
+		else {
+			g_last_typed += Character.toString(key);
+			g_index_current_char++;
 		}
 	}
-
-	// Retrieve a new word
-	g_index_current_word += 1;
-	g_current_word = g_list_words.get(g_index_current_word);
-	g_index_current_char = 0;
-	g_last_typed = "";
 }
 
 void mousePressed() {
@@ -242,10 +251,7 @@ void mousePressed() {
 	}
 
 	// Open Keyboard
-	if (!g_is_keyboard_open){
-		g_is_keyboard_open = true;
-		openKeyboard();
-	}
+	openKeyboard();
 }
 
 public void onResume() {
