@@ -48,7 +48,7 @@ boolean g_is_keyboard_open = false;
 void setup() {
 	// Initialize display
 	fullScreen();
-	textFont(createFont("SansSerif", 40 * displayDensity));
+	textFont(createFont("SansSerif", 40 * displayDensity), 20);
 	fill(0);
 
 	// Create queue and queue lock
@@ -59,6 +59,7 @@ void setup() {
 	String[] lines = loadStrings("words_alpha.txt");
 	g_list_words = new StringList(lines);
 	g_list_words.shuffle();
+	g_current_word = g_list_words.get(g_index_current_word)
 
 	// Load Host Address
 	try{
@@ -170,22 +171,22 @@ void selectMode() {
 	rect(0, 0, width, height/2);
 	rect(0, height/2, width, height);
 	fill(0);
-	text("Training", width/3, height/6, width/3, height/6);
-	text("Inference", width/3, height/2 + height/6, width/3, height/6);
+	text("Training", width * 2/3, height * 2/6);
+	text("Inference", width * 2/3, height/2 + height * 2/6);
 }
 
 void runTraining() {
 	background(255);
 	fill(0);
-	text(g_current_word, width/12, height/10, width * 10/12, height/10);
+	text(g_current_word, width/12, height/10);
 	fill(255, 0, 0);
-	text(g_last_typed, width/12, height * 3/10, width * 10/12, height/10);
+	text(g_last_typed, width/12, height * 3/10);
 }
 
 void runInferrence() {
 	background(255);
 	fill(255, 0, 0);
-	text(g_last_typed, width/12, height/6, width * 10/12, height/6);
+	text(g_last_typed, width/12, height/6);
 }
 
 /****************************************************/
