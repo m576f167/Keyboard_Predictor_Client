@@ -98,8 +98,6 @@ void setup() {
  */
 void draw() {
 	background(255);
-//	text(key, width/2, height/2);
-	text("aX: " + ax + "\naY: " + ay + "\naZ: " + az + "\naT: " + at + "\n\ngX: " + gx + "\ngY: " + gy + "\ngZ: " + gz + "\ngT: " + gt, 0, 0, width, height);
 	if (g_mode == 0) {
 		selectMode();
 	}
