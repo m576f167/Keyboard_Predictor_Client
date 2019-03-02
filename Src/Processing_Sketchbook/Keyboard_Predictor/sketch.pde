@@ -179,7 +179,7 @@ void runTraining() {
 	background(255);
 	fill(0);
 	text(g_current_word, width/12, height/10);
-	fill();
+	fill(0);
 	text(g_last_typed, width/12, height * 3/10);
 }
 
