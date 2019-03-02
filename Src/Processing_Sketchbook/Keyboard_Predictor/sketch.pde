@@ -102,7 +102,7 @@ void draw() {
 		selectMode();
 	}
 	else if (g_mode == 1) {
-		runPrediction();
+		runTraining();
 	}
 	else if (g_mode == 2) {
 		runInferrence();
@@ -153,7 +153,7 @@ public void putSensorData(SensorEvent event, Queue<JSONObject> queue, MutexLock 
 	data.setLong("t", event.timestamp);
 
 	if (keyPressed){
-		data.setString("key", key);
+		data.setString("key", Character.toString(key));
 	}
 	else {
 		data.setString("key", "NULL");
@@ -197,12 +197,12 @@ void runInferrence() {
 
 void keyReleased() {
 	if (g_current_word.charAt(g_index_current_char) == key) {
-		g_last_typed += key;
+		g_last_typed += Character.toString(key);
 		g_index_current_char++;
 	}
 	else {
 		g_index_current_word += 1;
-		g_current_word = g_list_words[g_index_current_word];
+		g_current_word = g_list_words.get(g_index_current_word);
 		g_index_current_char = 0;
 		g_last_typed = "";
 	}
@@ -270,18 +270,19 @@ void threadSendData() {
 				return;
 			}
 
+			JSONObject data = new JSONObject();
 			synchronized(g_lock_queue_data) {
-				JSONObject data = g_queue_data.peek();
+				data = g_queue_data.peek();
 			}
 
 			PostRequest post = new PostRequest(g_host_address + g_api);
 			post.addData("data", data);
 			post.send();
 
-			response = post.getContent();
-			response = parseJSONObject(response);
+			String response = post.getContent();
+			JSONObject response_json = parseJSONObject(response);
 
-			if (response.getInt("status-code") == 0) {
+			if (response_json.getInt("status-code") == 0) {
 				synchronized(g_lock_queue_data) {
 					g_queue_data.remove();
 				}
