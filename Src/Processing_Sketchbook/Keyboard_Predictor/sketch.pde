@@ -170,8 +170,8 @@ void selectMode() {
 	rect(0, 0, width, height/2);
 	rect(0, height/2, width, height);
 	fill(0);
-	text(width/3, height/6, width/3, height/6);
-	text(width/3, height/2 + height/6, width/3, height/6);
+	text("Training", width/3, height/6, width/3, height/6);
+	text("Inference", width/3, height/2 + height/6, width/3, height/6);
 }
 
 void runTraining() {
