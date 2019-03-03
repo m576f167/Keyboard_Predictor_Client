@@ -123,7 +123,7 @@ class MutexLock {
 
 class AccelerometerListener implements SensorEventListener {
 	public void onSensorChanged(SensorEvent event) {
-		putSensorData(event, g_queue_data, g_lock_queue_data);
+		putSensorData("accelerometer", event, g_queue_data, g_lock_queue_data);
 	}
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 	}
@@ -131,7 +131,7 @@ class AccelerometerListener implements SensorEventListener {
 
 class GyroscopeListener implements SensorEventListener {
 	public void onSensorChanged(SensorEvent event) {
-		putSensorData(event, g_queue_data, g_lock_queue_data);
+		putSensorData("gyroscope", event, g_queue_data, g_lock_queue_data);
 	}
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 	}
@@ -144,8 +144,10 @@ class GyroscopeListener implements SensorEventListener {
  * Custom Methods
  */
 
-public void putSensorData(SensorEvent event, Queue<JSONObject> queue, MutexLock lock) {
+public void putSensorData(String sensor_type, SensorEvent event, Queue<JSONObject> queue, MutexLock lock) {
 	JSONObject data = new JSONObject();
+
+	data.setString("sensor-type", sensor_type);
 
 	data.setFloat("x", event.values[0]);
 	data.setFloat("y", event.values[1]);
@@ -239,11 +241,11 @@ void mousePressed() {
 	if (g_mode == 0){
 		if ((mouseY <= height/2) && (mouseY >= 0)) {
 			g_mode = 1;
-			g_api = "/post-training";
+			g_api = "/api/post-training";
 		}
 		else {
 			g_mode = 2;
-			g_api = "/post-inferrence";
+			g_api = "/api/post-inferrence";
 		}
 
 		// Start threadSendData
