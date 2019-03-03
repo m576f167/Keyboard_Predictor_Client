@@ -282,7 +282,22 @@ public void onPause() {
 void threadSendData() {
 	while (true){
 		try {
+			PostRequest post = new PostRequest(g_host_address + g_api);
 			if (g_mode == 0){
+				JSONObject data = new JSONObject();
+
+				data.setString("sensor-type", "NULL");
+
+				data.setFloat("x", 0);
+				data.setFloat("y", 0);
+				data.setFloat("z", 0);
+
+				data.setLong("t", 0);
+
+				data.setString("key", "NULL");
+
+				post.addData("data", data.toString());
+				post.send();
 				return;
 			}
 
@@ -291,7 +306,6 @@ void threadSendData() {
 				data = g_queue_data.peek();
 			}
 
-			PostRequest post = new PostRequest(g_host_address + g_api);
 			post.addData("data", data.toString());
 			post.send();
 
