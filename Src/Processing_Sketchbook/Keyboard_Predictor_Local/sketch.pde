@@ -30,8 +30,8 @@ String g_last_typed = "";
 int g_index_current_char = 0;
 int g_index_current_word = 0;
 int g_mode = 0;
-Table g_table_accelerometer = new Table();
-Table g_table_gyroscope = new Table();
+Table g_table_accelerometer;
+Table g_table_gyroscope;
 
 /****************************************************/
 // ================================================ //
@@ -113,8 +113,18 @@ class GyroscopeListener implements SensorEventListener {
  * Custom Methods
  */
 
+public Table createNewTable() {
+	Table table = new Table();
+	table.addColumn("x");
+	table.addColumn("y");
+	table.addColumn("z");
+	table.addColumn("t");
+	table.addColumn("key");
+	return(table);
+}
+
 public void putSensorData(String sensor_type, SensorEvent event) {
-	Table current_table = g_table_accelerometer;
+	Table current_table;
 	if (sensor_type.equals("accelerometer")){
 		current_table = g_table_accelerometer;
 	}
@@ -215,8 +225,8 @@ void mousePressed() {
 	if (g_mode == 0){
 		if ((mouseY <= height/2) && (mouseY >= 0)) {
 			g_mode = 1;
-			g_table_accelerometer = new Table();
-			g_table_gyroscope = new Table();
+			g_table_accelerometer = createNewTable();
+			g_table_gyroscope = createNewTable();
 		}
 		else {
 			g_mode = 2;
