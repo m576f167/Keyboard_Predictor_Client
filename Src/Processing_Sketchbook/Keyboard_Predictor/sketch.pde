@@ -210,6 +210,8 @@ JSONObject buildNULLJSON(){
 }
 
 String sendPostRequest(String url_address, String data){
+	BufferedReader reader = null;
+	String text = "";
 	try {
 		// Send data
 		URL url = new URL(url_address);
@@ -220,7 +222,6 @@ String sendPostRequest(String url_address, String data){
 		wr.flush();
 
 		// Read response
-		BufferedReader reader = null;
 		reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		StringBuilder sb = new StringBuilder();
 		String line = null;
