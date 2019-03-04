@@ -78,19 +78,13 @@ void setup() {
 	g_context = getActivity();
 	g_manager = (SensorManager)g_context.getSystemService(Context.SENSOR_SERVICE);
 
-	// Create and register Accelerometer Listener
+	// Create Accelerometer Listener
 	g_sensor_accelerometer = g_manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 	g_listener_accelerometer = new AccelerometerListener();
-	g_manager.registerListener(g_listener_accelerometer,
-				 g_sensor_accelerometer,
-				 SensorManager.SENSOR_DELAY_FASTEST);
 
-	// Create and register Gyroscope Listener
+	// Create Gyroscope Listener
 	g_sensor_gyroscope = g_manager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 	g_listener_gyroscope = new GyroscopeListener();
-	g_manager.registerListener(g_listener_gyroscope,
-				 g_sensor_gyroscope,
-				 SensorManager.SENSOR_DELAY_FASTEST);
 }
 
 /****************************************************/
@@ -255,8 +249,9 @@ void keyReleased() {
 	// When Back is pressed
 	if (keyCode == KeyEvent.KEYCODE_BACK) {
 		g_mode = 0;
-		g_api = "";
 		closeKeyboard();
+		g_manager.unregisterListener(g_listener_accelerometer);
+		g_manager.unregisterListener(g_listener_gyroscope);
 		return;
 	}
 
@@ -303,6 +298,16 @@ void mousePressed() {
 
 		// Start threadSendData
 		thread("threadSendData");
+
+		// Register Accelerometer Listener
+		g_manager.registerListener(g_listener_accelerometer,
+					 g_sensor_accelerometer,
+					 SensorManager.SENSOR_DELAY_FASTEST);
+
+		// Register Gyroscope Listener
+		g_manager.registerListener(g_listener_gyroscope,
+					 g_sensor_gyroscope,
+					 SensorManager.SENSOR_DELAY_FASTEST);
 	}
 
 	// Open Keyboard
