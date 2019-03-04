@@ -180,7 +180,7 @@ void runInferrence() {
 
 void keyReleased() {
 	// When Back is pressed
-	if (keyCode == KeyEvent.KEYCODE_BACK) {
+	if (keyCode == KeyEvent.KEYCODE_ENTER) {
 		g_mode = 0;
 		closeKeyboard();
 		g_manager.unregisterListener(g_listener_accelerometer);
