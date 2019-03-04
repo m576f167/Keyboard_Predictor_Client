@@ -30,8 +30,8 @@ String g_last_typed = "";
 int g_index_current_char = 0;
 int g_index_current_word = 0;
 int g_mode = 0;
-Table g_table_accelerometer;
-Table g_table_gyroscope;
+Table g_table_accelerometer = new Table();
+Table g_table_gyroscope = new Table();
 
 /****************************************************/
 // ================================================ //
