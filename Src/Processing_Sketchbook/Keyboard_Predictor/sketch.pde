@@ -240,7 +240,7 @@ String sendPostRequest(String url_address, String data){
 		}
 		catch(Exception e) {}
 	}
-	return (text)
+	return (text);
 }
 
 /****************************************************/
