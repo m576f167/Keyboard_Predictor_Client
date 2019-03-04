@@ -12,7 +12,9 @@ import android.hardware.SensorEventListener;
 import android.view.KeyEvent;
 import java.util.LinkedList;
 import java.util.Queue;
-import http.requests.*;
+import java.net.*;
+import java.io.*;
+import java.lang.StringBuilder;
 
 /****************************************************/
 // ================================================ //
@@ -191,6 +193,56 @@ void runInferrence() {
 	text(g_last_typed, width/12, height/6);
 }
 
+JSONObject buildNULLJSON(){
+	JSONObject data = new JSONObject();
+
+	data.setString("sensor-type", "NULL");
+
+	data.setFloat("x", 0);
+	data.setFloat("y", 0);
+	data.setFloat("z", 0);
+
+	data.setLong("t", 0);
+
+	data.setString("key", "NULL");
+
+	return(data);
+}
+
+String sendPostRequest(String url_address, String data){
+	try {
+		// Send data
+		URL url = new URL(url_address);
+		URLConnection conn = url.openConnection();
+		conn.setDoOutput(true);
+		OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+		wr.write(data);
+		wr.flush();
+
+		// Read response
+		BufferedReader reader = null;
+		reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		StringBuilder sb = new StringBuilder();
+		String line = null;
+
+		while((line = reader.readLine()) != null)
+		{
+			// Append server response in string
+			sb.append(line + "\n");
+		}
+		text = sb.toString();
+	}
+	catch(Exception e) {}
+	finally
+	{
+		try {
+			reader.close();
+		}
+		catch(Exception e) {}
+	}
+	return (text)
+}
+
 /****************************************************/
 // ================================================ //
 /****************************************************/
@@ -282,22 +334,9 @@ public void onPause() {
 void threadSendData() {
 	while (true){
 		try {
-			PostRequest post = new PostRequest(g_host_address + g_api);
 			if (g_mode == 0){
-				JSONObject data = new JSONObject();
-
-				data.setString("sensor-type", "NULL");
-
-				data.setFloat("x", 0);
-				data.setFloat("y", 0);
-				data.setFloat("z", 0);
-
-				data.setLong("t", 0);
-
-				data.setString("key", "NULL");
-
-				post.addData("data", data.toString());
-				post.send();
+				JSONObject data = buildNULLJSON();
+				sendPostRequest(g_host_address + g_api, "data="+data.toString());
 				return;
 			}
 
@@ -306,10 +345,7 @@ void threadSendData() {
 				data = g_queue_data.peek();
 			}
 
-			post.addData("data", data.toString());
-			post.send();
-
-			String response = post.getContent();
+			String response = sendPostRequest(g_host_address + g_api, "data="+data.toString());
 			JSONObject response_json = parseJSONObject(response);
 
 			if (response_json.getInt("status-code") == 0) {
