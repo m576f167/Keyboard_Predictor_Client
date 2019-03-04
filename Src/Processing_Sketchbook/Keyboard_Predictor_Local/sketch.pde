@@ -115,14 +115,14 @@ class GyroscopeListener implements SensorEventListener {
 
 public void putSensorData(String sensor_type, SensorEvent event) {
 	Table current_table;
-	if (sensor_type.equal("accelerometer")){
+	if (sensor_type.equals("accelerometer")){
 		current_table = g_table_accelerometer;
 	}
-	else if (sensor_type.equal("gyroscope")){
+	else if (sensor_type.equals("gyroscope")){
 		current_table = g_table_gyroscope;
 	}
 
-	TableRow new_row = current_table.newRow();
+	TableRow new_row = current_table.addRow();
 	new_row.setFloat("x", event.values[0]);
 	new_row.setFloat("y", event.values[1]);
 	new_row.setFloat("z", event.values[2]);
@@ -175,7 +175,7 @@ void keyReleased() {
 		closeKeyboard();
 		g_manager.unregisterListener(g_listener_accelerometer);
 		g_manager.unregisterListener(g_listener_gyroscope);
-		String current_time = year().toString() + "-" + month().toString() + "-" + day().toString() + "_" + hour().toString() + ":" + minute().toString() + ":" + second().toString();
+		String current_time = str(year()) + "-" + str(month()) + "-" + str(day()) + "_" + str(hour()) + ":" + str(minute()) + ":" + str(second());
 		saveTable(g_table_accelerometer, "accelerometer_" + current_time + ".csv");
 		saveTable(g_table_gyroscope, "gyroscope_" + current_time + ".csv");
 		return;
