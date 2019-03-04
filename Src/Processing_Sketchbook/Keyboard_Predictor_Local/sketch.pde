@@ -124,7 +124,7 @@ public Table createNewTable() {
 }
 
 public void putSensorData(String sensor_type, SensorEvent event) {
-	Table current_table;
+	Table current_table = g_table_accelerometer;
 	if (sensor_type.equals("accelerometer")){
 		current_table = g_table_accelerometer;
 	}
