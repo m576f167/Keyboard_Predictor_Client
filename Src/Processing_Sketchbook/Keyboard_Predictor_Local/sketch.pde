@@ -164,7 +164,7 @@ public void putSensorData(String sensor_type, SensorEvent event) {
 
 public void putKeyPress(String key, long timestamp) {
 	TableRow new_row = g_table_keypress.addRow();
-	new_row.setString("key", Character.toString(key));
+	new_row.setString("key", key);
 	new_row.setLong("t", timestamp);
 }
 
@@ -236,7 +236,7 @@ void keyReleased() {
 
 		// Put Key Press
 		long timestamp = SystemClock.elapsedRealtimeNanos();
-		putKeyPress(key, timestamp);
+		putKeyPress(Character.toString(key), timestamp);
 	}
 	else if (g_mode == 2) {
 		// Normal Key is pressed until space
