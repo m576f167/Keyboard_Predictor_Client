@@ -162,9 +162,9 @@ public void putSensorData(String sensor_type, SensorEvent event) {
 	new_row.setLong("t", event.timestamp);
 }
 
-public void putKeyPress(char key, long timestamp) {
+public void putKeyPress(String key, long timestamp) {
 	TableRow new_row = g_table_keypress.addRow();
-	new_row.setChar("key", key);
+	new_row.setString("key", Character.toString(key));
 	new_row.setLong("t", timestamp);
 }
 
