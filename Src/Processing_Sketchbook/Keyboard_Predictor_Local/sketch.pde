@@ -148,6 +148,7 @@ public Table createNewKeypressTable() {
 	Table table = new Table();
 	table.addColumn("key");
 	table.addColumn("t");
+	return(table);
 }
 
 public void putSensorData(String sensor_type, SensorEvent event) {
