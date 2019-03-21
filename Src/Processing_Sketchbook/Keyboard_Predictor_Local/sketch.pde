@@ -235,7 +235,7 @@ void keyReleased() {
 		g_last_typed = "";
 
 		// Put Key Press
-		timestamp = SystemClock.elapsedRealtimeNanos();
+		long timestamp = SystemClock.elapsedRealtimeNanos();
 		putKeyPress(key, timestamp);
 	}
 	else if (g_mode == 2) {
