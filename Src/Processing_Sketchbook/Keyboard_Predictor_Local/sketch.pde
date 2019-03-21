@@ -135,14 +135,19 @@ class GyroscopeListener implements SensorEventListener {
  * Custom Methods
  */
 
-public Table createNewTable() {
+public Table createNewSensorTable() {
 	Table table = new Table();
 	table.addColumn("x");
 	table.addColumn("y");
 	table.addColumn("z");
 	table.addColumn("t");
-	table.addColumn("key");
 	return(table);
+}
+
+public Table createNewKeypressTable() {
+	Table table = new Table();
+	table.addColumn("key");
+	table.addColumn("t");
 }
 
 public void putSensorData(String sensor_type, SensorEvent event) {
@@ -259,8 +264,9 @@ void mousePressed() {
 	if (g_mode == 0){
 		if ((mouseY <= height/2) && (mouseY >= 0)) {
 			g_mode = 1;
-			g_table_accelerometer = createNewTable();
-			g_table_gyroscope = createNewTable();
+			g_table_accelerometer = createNewSensorTable();
+			g_table_gyroscope = createNewSensorTable();
+			g_table_keypress = createNewKeypressTable();
 		}
 		else {
 			g_mode = 2;
