@@ -35,6 +35,7 @@ Table g_table_accelerometer;
 Table g_table_gyroscope;
 Table g_table_keypress;
 boolean g_is_permission = true;
+long g_time_pressed;
 
 /****************************************************/
 // ================================================ //
@@ -147,7 +148,8 @@ public Table createNewSensorTable() {
 public Table createNewKeypressTable() {
 	Table table = new Table();
 	table.addColumn("key");
-	table.addColumn("t");
+	table.addColumn("time_pressed");
+	table.addColumn("time_released");
 	return(table);
 }
 
@@ -168,10 +170,11 @@ public void putSensorData(String sensor_type, SensorEvent event) {
 	new_row.setLong("t", event.timestamp);
 }
 
-public void putKeyPress(String key, long timestamp) {
+public void putKeyPress(String key, long time_pressed, long time_released) {
 	TableRow new_row = g_table_keypress.addRow();
 	new_row.setString("key", key);
-	new_row.setLong("t", timestamp);
+	new_row.setLong("time_pressed", time_pressed);
+	new_row.setLong("time_released", time_released);
 }
 
 void selectMode() {
@@ -204,6 +207,10 @@ void runInferrence() {
 /*
  * Interrupt Event Driven Methods
  */
+
+void keyPressed() {
+	g_time_pressed = SystemClock.elapsedRealtimeNanos();
+}
 
 void keyReleased() {
 	if (g_mode == -1){
@@ -241,8 +248,8 @@ void keyReleased() {
 		g_last_typed = "";
 
 		// Put Key Press
-		long timestamp = SystemClock.elapsedRealtimeNanos();
-		putKeyPress(Character.toString(key), timestamp);
+		long time_released = SystemClock.elapsedRealtimeNanos();
+		putKeyPress(Character.toString(key), g_time_pressed, time_released);
 	}
 	else if (g_mode == 2) {
 		// Normal Key is pressed until space
