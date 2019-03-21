@@ -10,6 +10,7 @@ import android.hardware.SensorManager;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.view.KeyEvent;
+import android.os.SystemClock;
 
 /****************************************************/
 // ================================================ //
@@ -32,10 +33,25 @@ int g_index_current_word = 0;
 int g_mode = 0;
 Table g_table_accelerometer;
 Table g_table_gyroscope;
+Table g_table_keypress;
+boolean g_is_permission = true;
 
 /****************************************************/
 // ================================================ //
 /****************************************************/
+/*
+ * Init permission
+ */
+void initPermission(boolean granted) {
+	if (granted) {
+		g_is_permission = true;
+	}
+	else {
+		g_is_permission = false;
+		g_mode = -1;
+	}
+}
+
 /*
  * Setup method
  */
@@ -44,6 +60,8 @@ void setup() {
 	fullScreen();
 	textFont(createFont("SansSerif", 40 * displayDensity));
 	fill(0);
+
+	requestPermission("android.permission.WRITE_EXTERNAL_STORAGE", "initPermission");
 
 	// Load Word list
 	String[] lines = loadStrings("words_alpha.txt");
@@ -72,7 +90,11 @@ void setup() {
  */
 void draw() {
 	background(255);
-	if (g_mode == 0) {
+	if (g_mode == -1) {
+		fill(0);
+		text("Permissions must be enabled!", width/2, height/2);
+	}
+	else if (g_mode == 0) {
 		selectMode();
 	}
 	else if (g_mode == 1) {
@@ -138,13 +160,12 @@ public void putSensorData(String sensor_type, SensorEvent event) {
 	new_row.setFloat("z", event.values[2]);
 
 	new_row.setLong("t", event.timestamp);
+}
 
-	if (keyPressed){
-		new_row.setString("key", Character.toString(key));
-	}
-	else {
-		new_row.setString("key", "NULL");
-	}
+public void putKeyPress(char key, long timestamp) {
+	TableRow new_row = g_table_keypress.addRow();
+	new_row.setString("key", key);
+	new_row.setLong("t", timestamp);
 }
 
 void selectMode() {
@@ -179,6 +200,10 @@ void runInferrence() {
  */
 
 void keyReleased() {
+	if (g_mode == -1){
+		return;
+	}
+
 	// When Back is pressed
 	if (keyCode == KeyEvent.KEYCODE_ENTER) {
 		g_mode = 0;
@@ -186,8 +211,9 @@ void keyReleased() {
 		g_manager.unregisterListener(g_listener_accelerometer);
 		g_manager.unregisterListener(g_listener_gyroscope);
 		String current_time = str(year()) + "-" + str(month()) + "-" + str(day()) + "_" + str(hour()) + ":" + str(minute()) + ":" + str(second());
-		saveTable(g_table_accelerometer, "accelerometer_" + current_time + ".csv");
-		saveTable(g_table_gyroscope, "gyroscope_" + current_time + ".csv");
+		saveTable(g_table_accelerometer, "/storage/emulated/0/accelerometer_" + current_time + ".csv");
+		saveTable(g_table_gyroscope, "/storage/emulated/0/gyroscope_" + current_time + ".csv");
+		saveTable(g_table_keypress, "/storage/emulated/0/keypress_" + current_time + ".csv");
 		return;
 	}
 
@@ -207,6 +233,10 @@ void keyReleased() {
 		g_current_word = g_list_words.get(g_index_current_word);
 		g_index_current_char = 0;
 		g_last_typed = "";
+
+		// Put Key Press
+		timestamp = SystemClock.elapsedRealtimeNanos();
+		putKeyPress(key, timestamp);
 	}
 	else if (g_mode == 2) {
 		// Normal Key is pressed until space
@@ -222,6 +252,10 @@ void keyReleased() {
 }
 
 void mousePressed() {
+	if (g_mode == -1){
+		return;
+	}
+
 	if (g_mode == 0){
 		if ((mouseY <= height/2) && (mouseY >= 0)) {
 			g_mode = 1;
@@ -249,6 +283,11 @@ void mousePressed() {
 
 public void onResume() {
 	super.onResume();
+
+	if (g_mode == -1){
+		return;
+	}
+
 	if (g_manager != null) {
 		g_manager.registerListener(g_listener_accelerometer, g_sensor_accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
 		g_manager.registerListener(g_listener_gyroscope, g_sensor_gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
@@ -257,6 +296,11 @@ public void onResume() {
 
 public void onPause() {
 	super.onPause();
+
+	if (g_mode == -1){
+		return;
+	}
+
 	if (g_manager != null) {
 		g_manager.unregisterListener(g_listener_accelerometer);
 		g_manager.unregisterListener(g_listener_gyroscope);
