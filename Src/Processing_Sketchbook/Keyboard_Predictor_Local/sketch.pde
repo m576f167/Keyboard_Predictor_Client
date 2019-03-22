@@ -231,6 +231,10 @@ void keyReleased() {
 	}
 
 	if (g_mode == 1) {
+		// Put Key Press
+		long time_released = SystemClock.elapsedRealtimeNanos();
+		putKeyPress(Character.toString(key), g_time_pressed, time_released);
+
 		// Normal Key is pressed
 		if (g_current_word.charAt(g_index_current_char) == key) {
 			g_last_typed += Character.toString(key);
@@ -246,10 +250,6 @@ void keyReleased() {
 		g_current_word = g_list_words.get(g_index_current_word);
 		g_index_current_char = 0;
 		g_last_typed = "";
-
-		// Put Key Press
-		long time_released = SystemClock.elapsedRealtimeNanos();
-		putKeyPress(Character.toString(key), g_time_pressed, time_released);
 	}
 	else if (g_mode == 2) {
 		// Normal Key is pressed until space
